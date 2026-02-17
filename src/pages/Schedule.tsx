@@ -2,13 +2,10 @@ import { Layout } from "@/components/Layout";
 import { useJobs } from "@/hooks/useJobs";
 import { useTechnicians } from "@/hooks/useTechnicians";
 import { useUpdateJob } from "@/hooks/useUpdateJob";
-import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useCallback, useMemo, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -16,7 +13,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
 import resourceDayGridPlugin from "@fullcalendar/resource-daygrid";
 import type { EventDropArg, EventClickArg } from "@fullcalendar/core";
-import { CalendarDays, RefreshCw, Link2, Unlink } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
 const TECH_COLORS = [
   "hsl(186, 100%, 35%)",
@@ -34,17 +31,6 @@ export default function Schedule() {
   const { data: technicians, isLoading: techsLoading } = useTechnicians();
   const updateJob = useUpdateJob();
   const calendarRef = useRef<FullCalendar>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const gcal = useGoogleCalendar();
-
-  // Handle OAuth callback
-  useEffect(() => {
-    const code = searchParams.get("code");
-    if (code) {
-      gcal.exchangeCode(code);
-      setSearchParams({}, { replace: true });
-    }
-  }, [searchParams, gcal.exchangeCode, setSearchParams]);
 
   const resources = useMemo(() => {
     if (!technicians) return [];
@@ -118,15 +104,6 @@ export default function Schedule() {
     toast.info(`Job: ${info.event.title}`);
   }, []);
 
-  const handleConnectGoogle = useCallback(async () => {
-    try {
-      const url = await gcal.getAuthUrl();
-      window.location.href = url;
-    } catch {
-      toast.error("Failed to get Google auth URL. Check that credentials are configured.");
-    }
-  }, [gcal]);
-
   const isLoading = jobsLoading || techsLoading;
 
   return (
@@ -142,27 +119,7 @@ export default function Schedule() {
               Drag and drop jobs to reschedule across technicians.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            {gcal.loading ? (
-              <Skeleton className="h-9 w-40" />
-            ) : gcal.connected ? (
-              <>
-                <Button variant="outline" size="sm" onClick={gcal.syncJobs} disabled={gcal.syncing}>
-                  <RefreshCw className={`h-4 w-4 mr-1 ${gcal.syncing ? "animate-spin" : ""}`} />
-                  {gcal.syncing ? "Syncing..." : "Sync to Google"}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={gcal.disconnect}>
-                  <Unlink className="h-4 w-4 mr-1" />
-                  Disconnect
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" size="sm" onClick={handleConnectGoogle}>
-                <Link2 className="h-4 w-4 mr-1" />
-                Connect Google Calendar
-              </Button>
-            )}
-          </div>
+        
         </div>
 
         <Card>
