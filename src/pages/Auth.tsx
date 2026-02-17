@@ -7,12 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Phone } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -82,6 +85,17 @@ export default function Auth() {
               {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
             </Button>
           </form>
+          {isLogin && (
+            <div className="mt-2 text-center text-sm">
+              <button
+                type="button"
+                onClick={() => setShowForgot(true)}
+                className="text-muted-foreground hover:text-primary hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
           <div className="mt-4 text-center text-sm">
             <button
               type="button"
@@ -91,6 +105,36 @@ export default function Auth() {
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>
           </div>
+
+          {showForgot && (
+            <div className="mt-4 border-t pt-4 space-y-3">
+              <Label htmlFor="reset-email">Enter your email to reset password</Label>
+              <Input
+                id="reset-email"
+                type="email"
+                placeholder="you@company.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
+              <Button
+                className="w-full"
+                variant="outline"
+                disabled={loading}
+                onClick={async () => {
+                  setLoading(true);
+                  const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  });
+                  if (error) toast.error(error.message);
+                  else toast.success("Check your email for the reset link!");
+                  setLoading(false);
+                  setShowForgot(false);
+                }}
+              >
+                Send Reset Link
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
