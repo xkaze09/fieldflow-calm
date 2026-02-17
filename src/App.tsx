@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Calls from "./pages/Calls";
 import Leads from "./pages/Leads";
 import Jobs from "./pages/Jobs";
+import Schedule from "./pages/Schedule";
 import Parts from "./pages/Parts";
 import Technicians from "./pages/Technicians";
 import Settings from "./pages/Settings";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/calls" element={<ProtectedRoute><Calls /></ProtectedRoute>} />
             <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
             <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+            <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/parts" element={<ProtectedRoute><Parts /></ProtectedRoute>} />
             <Route path="/technicians" element={<ProtectedRoute><Technicians /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
