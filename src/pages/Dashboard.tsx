@@ -3,68 +3,58 @@ import { MetricCard } from "@/components/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Phone, Users, Briefcase, DollarSign, Clock, TrendingUp } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
-
-// Mock data
-const metrics = [
-  {
-    title: "Total Calls Today",
-    value: 47,
-    icon: <Phone className="h-6 w-6" />,
-    trend: { value: 12, label: "vs yesterday" },
-  },
-  {
-    title: "Active Leads",
-    value: 23,
-    icon: <Users className="h-6 w-6" />,
-    trend: { value: 8, label: "this week" },
-  },
-  {
-    title: "Jobs Scheduled",
-    value: 15,
-    icon: <Briefcase className="h-6 w-6" />,
-    trend: { value: -5, label: "vs last week" },
-  },
-  {
-    title: "Revenue (Today)",
-    value: "$8,420",
-    icon: <DollarSign className="h-6 w-6" />,
-    trend: { value: 24, label: "vs yesterday" },
-  },
-];
-
-const recentCalls = [
-  { id: 1, from: "(555) 123-4567", time: "2 min ago", status: "answered" as const },
-  { id: 2, from: "(555) 234-5678", time: "15 min ago", status: "missed" as const },
-  { id: 3, from: "(555) 345-6789", time: "32 min ago", status: "answered" as const },
-  { id: 4, from: "(555) 456-7890", time: "1 hr ago", status: "answered" as const },
-  { id: 5, from: "(555) 567-8901", time: "2 hr ago", status: "missed" as const },
-];
-
-const upcomingJobs = [
-  { id: 1, customer: "John Smith", time: "9:00 AM", tech: "Mike R.", status: "scheduled" as const },
-  { id: 2, customer: "Sarah Johnson", time: "11:30 AM", tech: "Tom L.", status: "scheduled" as const },
-  { id: 3, customer: "Bob Williams", time: "2:00 PM", tech: "Mike R.", status: "in-progress" as const },
-  { id: 4, customer: "Emma Davis", time: "4:30 PM", tech: "Tom L.", status: "scheduled" as const },
-];
+import { useRecentCalls } from "@/hooks/useCalls";
+import { useTodayJobs } from "@/hooks/useJobs";
+import { useLeadCounts } from "@/hooks/useLeads";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatDistanceToNow } from "date-fns";
 
 export default function Dashboard() {
+  const { data: recentCalls, isLoading: callsLoading } = useRecentCalls(5);
+  const { data: todayJobs, isLoading: jobsLoading } = useTodayJobs();
+  const { data: leadCounts } = useLeadCounts();
+
+  const totalLeads = leadCounts
+    ? Object.values(leadCounts).reduce((a, b) => a + b, 0)
+    : 0;
+
+  const metrics = [
+    {
+      title: "Calls Today",
+      value: recentCalls?.length ?? 0,
+      icon: <Phone className="h-6 w-6" />,
+    },
+    {
+      title: "Active Leads",
+      value: totalLeads,
+      icon: <Users className="h-6 w-6" />,
+    },
+    {
+      title: "Jobs Scheduled",
+      value: todayJobs?.filter((j) => j.status === "scheduled").length ?? 0,
+      icon: <Briefcase className="h-6 w-6" />,
+    },
+    {
+      title: "Revenue (Today)",
+      value: `$${(todayJobs?.reduce((sum, j) => sum + Number(j.total_price || 0), 0) ?? 0).toLocaleString()}`,
+      icon: <DollarSign className="h-6 w-6" />,
+    },
+  ];
+
   return (
     <Layout>
       <div className="space-y-8">
-        {/* Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Welcome back! Here's what's happening today.</p>
         </div>
 
-        {/* Metrics Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric, i) => (
             <MetricCard key={i} {...metric} />
           ))}
         </div>
 
-        {/* Two Column Layout */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Recent Calls */}
           <Card>
@@ -73,70 +63,76 @@ export default function Dashboard() {
               <Phone className="h-5 w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentCalls.map((call) => (
-                  <div
-                    key={call.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Phone className="h-5 w-5 text-primary" />
+              {callsLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+                </div>
+              ) : recentCalls && recentCalls.length > 0 ? (
+                <div className="space-y-4">
+                  {recentCalls.map((call) => (
+                    <div
+                      key={call.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Phone className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{(call as any).leads?.name || call.from_number}</p>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatDistanceToNow(new Date(call.started_at), { addSuffix: true })}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{call.from}</p>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {call.time}
-                        </p>
-                      </div>
+                      <StatusBadge status={call.status as any} />
                     </div>
-                    <StatusBadge status={call.status} />
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8">No calls yet</p>
+              )}
             </CardContent>
           </Card>
 
-          {/* Upcoming Jobs */}
+          {/* Today's Schedule */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-semibold">Today's Schedule</CardTitle>
               <Briefcase className="h-5 w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {upcomingJobs.map((job) => (
-                  <div
-                    key={job.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">{job.customer}</p>
-                      <p className="text-sm text-muted-foreground">{job.time} • {job.tech}</p>
+              {jobsLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+                </div>
+              ) : todayJobs && todayJobs.length > 0 ? (
+                <div className="space-y-4">
+                  {todayJobs.map((job) => (
+                    <div
+                      key={job.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{(job as any).leads?.name || "Unknown"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {job.scheduled_at
+                            ? new Date(job.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                            : "TBD"}{" "}
+                          • {(job as any).technicians?.name || "Unassigned"}
+                        </p>
+                      </div>
+                      <StatusBadge status={job.status as any} />
                     </div>
-                    <StatusBadge status={job.status} />
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8">No jobs scheduled today</p>
+              )}
             </CardContent>
           </Card>
         </div>
-
-        {/* Performance Chart Placeholder */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Performance Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center border-2 border-dashed border-border rounded-lg">
-              <p className="text-muted-foreground">Chart visualization coming soon</p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </Layout>
   );
