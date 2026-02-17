@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   LayoutDashboard, 
   Phone, 
@@ -9,7 +10,8 @@ import {
   Package, 
   Wrench,
   Menu,
-  X
+  X,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -26,6 +28,7 @@ const navigation = [
 export function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { signOut, user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -91,11 +94,19 @@ export function Layout({ children }: { children: ReactNode }) {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-border">
-            <div className="text-xs text-muted-foreground">
-              <p className="font-medium">Twilio Integrated</p>
-              <p>Version 1.0.0</p>
-            </div>
+          <div className="p-4 border-t border-border space-y-3">
+            {user && (
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-muted-foreground"
+              onClick={signOut}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </aside>
