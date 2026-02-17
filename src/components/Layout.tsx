@@ -11,7 +11,8 @@ import {
   Wrench,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -23,6 +24,7 @@ const navigation = [
   { name: "Jobs", href: "/jobs", icon: Briefcase },
   { name: "Parts", href: "/parts", icon: Package },
   { name: "Technicians", href: "/technicians", icon: Wrench },
+  { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
