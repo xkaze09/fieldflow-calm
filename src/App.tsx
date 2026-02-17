@@ -10,6 +10,7 @@ import Leads from "./pages/Leads";
 import Jobs from "./pages/Jobs";
 import Parts from "./pages/Parts";
 import Technicians from "./pages/Technicians";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
             <Route path="/parts" element={<ProtectedRoute><Parts /></ProtectedRoute>} />
             <Route path="/technicians" element={<ProtectedRoute><Technicians /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
