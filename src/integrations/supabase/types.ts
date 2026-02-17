@@ -67,6 +67,39 @@ export type Database = {
           },
         ]
       }
+      google_calendar_tokens: {
+        Row: {
+          access_token: string
+          calendar_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          refresh_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          calendar_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          refresh_token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          calendar_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          refresh_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_parts: {
         Row: {
           id: string
@@ -113,6 +146,7 @@ export type Database = {
         Row: {
           call_id: string | null
           created_at: string
+          google_calendar_event_id: string | null
           id: string
           labor_cost: number | null
           labor_hours: number | null
@@ -129,6 +163,7 @@ export type Database = {
         Insert: {
           call_id?: string | null
           created_at?: string
+          google_calendar_event_id?: string | null
           id?: string
           labor_cost?: number | null
           labor_hours?: number | null
@@ -145,6 +180,7 @@ export type Database = {
         Update: {
           call_id?: string | null
           created_at?: string
+          google_calendar_event_id?: string | null
           id?: string
           labor_cost?: number | null
           labor_hours?: number | null
