@@ -143,14 +143,7 @@ export default function Technicians() {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2"><Label>Cost Rate ($/hr)</Label><Input type="number" value={form.hourly_cost} onChange={(e) => setForm({ ...form, hourly_cost: e.target.value })} /></div>
-                  <div className="space-y-2"><Label>Bill Rate ($/hr)</Label><Input type="number" value={form.hourly_rate} onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })} /></div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2"><Label>Commission %</Label><Input type="number" value={form.commission_rate} onChange={(e) => setForm({ ...form, commission_rate: e.target.value })} /></div>
-                  <div className="space-y-2"><Label>Contact</Label><Input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} /></div>
-                </div>
+                <div className="space-y-2"><Label>Contact</Label><Input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} /></div>
                 <Button onClick={handleSubmit} disabled={isPending} className="w-full">
                   {isPending ? "Saving..." : editingTech ? "Save Changes" : "Add Technician"}
                 </Button>
