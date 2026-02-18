@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Phone, Search, Play, Briefcase, PhoneOutgoing } from "lucide-react";
+import { Phone, Search, Play, Briefcase, PhoneOutgoing, PhoneIncoming, PhoneMissed, PhoneCall } from "lucide-react";
 import { useCalls } from "@/hooks/useCalls";
 import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -54,12 +54,24 @@ export default function Calls() {
     );
   });
 
+  const missedCount = calls?.filter((c) => c.status === "missed").length ?? 0;
+  const inboundCount = calls?.filter((c) => c.direction === "inbound").length ?? 0;
+  const outboundCount = calls?.filter((c) => c.direction === "outbound").length ?? 0;
+  const activeCount = calls?.filter((c) => c.status === "ringing" || c.status === "in-progress").length ?? 0;
+
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return "0:00";
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
+
+  const stats = [
+    { label: "Missed", count: missedCount, icon: PhoneMissed, color: "text-destructive" },
+    { label: "Inbound", count: inboundCount, icon: PhoneIncoming, color: "text-primary" },
+    { label: "Outbound", count: outboundCount, icon: PhoneOutgoing, color: "text-accent-foreground" },
+    { label: "Active", count: activeCount, icon: PhoneCall, color: "text-green-500" },
+  ];
 
   return (
     <Layout>
@@ -95,6 +107,21 @@ export default function Calls() {
           </Dialog>
         </div>
 
+        <div className="grid gap-4 md:grid-cols-4">
+          {stats.map((stat) => (
+            <Card key={stat.label}>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    <p className="text-3xl font-bold">{stat.count}</p>
+                  </div>
+                  <stat.icon className={`h-8 w-8 ${stat.color} opacity-80`} />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
         <Card>
           <CardContent className="pt-6">
             <div className="relative">
