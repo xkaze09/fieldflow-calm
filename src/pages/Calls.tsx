@@ -18,6 +18,7 @@ import { toast } from "sonner";
 export default function Calls() {
   const { data: calls, isLoading } = useCalls();
   const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const navigate = useNavigate();
   const [historyLead, setHistoryLead] = useState<{ id: string; name: string } | null>(null);
   const [callDialogOpen, setCallDialogOpen] = useState(false);
@@ -47,11 +48,18 @@ export default function Calls() {
 
   const filtered = calls?.filter((c) => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch =
       c.from_number.toLowerCase().includes(q) ||
       c.to_number.toLowerCase().includes(q) ||
-      ((c as any).leads?.name || "").toLowerCase().includes(q)
-    );
+      ((c as any).leads?.name || "").toLowerCase().includes(q);
+
+    if (!matchesSearch) return false;
+    if (!activeFilter) return true;
+    if (activeFilter === "missed") return c.status === "missed";
+    if (activeFilter === "inbound") return c.direction === "inbound";
+    if (activeFilter === "outbound") return c.direction === "outbound";
+    if (activeFilter === "active") return c.status === "ringing" || c.status === "in-progress";
+    return true;
   });
 
   const missedCount = calls?.filter((c) => c.status === "missed").length ?? 0;
@@ -67,10 +75,10 @@ export default function Calls() {
   };
 
   const stats = [
-    { label: "Missed", count: missedCount, icon: PhoneMissed, color: "text-destructive" },
-    { label: "Inbound", count: inboundCount, icon: PhoneIncoming, color: "text-primary" },
-    { label: "Outbound", count: outboundCount, icon: PhoneOutgoing, color: "text-accent-foreground" },
-    { label: "Active", count: activeCount, icon: PhoneCall, color: "text-green-500" },
+    { label: "Missed", key: "missed", count: missedCount, icon: PhoneMissed, color: "text-destructive" },
+    { label: "Inbound", key: "inbound", count: inboundCount, icon: PhoneIncoming, color: "text-primary" },
+    { label: "Outbound", key: "outbound", count: outboundCount, icon: PhoneOutgoing, color: "text-accent-foreground" },
+    { label: "Active", key: "active", count: activeCount, icon: PhoneCall, color: "text-green-500" },
   ];
 
   return (
@@ -109,7 +117,11 @@ export default function Calls() {
 
         <div className="grid gap-4 md:grid-cols-4">
           {stats.map((stat) => (
-            <Card key={stat.label}>
+            <Card
+              key={stat.label}
+              className={`cursor-pointer transition-all hover:shadow-md ${activeFilter === stat.key ? "ring-2 ring-primary" : ""}`}
+              onClick={() => setActiveFilter(activeFilter === stat.key ? null : stat.key)}
+            >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -122,6 +134,14 @@ export default function Calls() {
             </Card>
           ))}
         </div>
+        {activeFilter && (
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              Filtering by: <span className="font-medium text-foreground capitalize">{activeFilter}</span>
+            </p>
+            <Button variant="ghost" size="sm" onClick={() => setActiveFilter(null)}>Clear</Button>
+          </div>
+        )}
         <Card>
           <CardContent className="pt-6">
             <div className="relative">
