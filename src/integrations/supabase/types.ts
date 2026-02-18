@@ -155,6 +155,7 @@ export type Database = {
           labor_hours: number | null
           lead_id: string | null
           location: string | null
+          notes: string | null
           parts_cost: number | null
           profit: number | null
           scheduled_at: string | null
@@ -172,6 +173,7 @@ export type Database = {
           labor_hours?: number | null
           lead_id?: string | null
           location?: string | null
+          notes?: string | null
           parts_cost?: number | null
           profit?: number | null
           scheduled_at?: string | null
@@ -189,6 +191,7 @@ export type Database = {
           labor_hours?: number | null
           lead_id?: string | null
           location?: string | null
+          notes?: string | null
           parts_cost?: number | null
           profit?: number | null
           scheduled_at?: string | null
