@@ -17,6 +17,7 @@ export type Database = {
       calls: {
         Row: {
           created_at: string
+          direction: string
           duration_seconds: number | null
           ended_at: string | null
           from_number: string
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          direction?: string
           duration_seconds?: number | null
           ended_at?: string | null
           from_number: string
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          direction?: string
           duration_seconds?: number | null
           ended_at?: string | null
           from_number?: string

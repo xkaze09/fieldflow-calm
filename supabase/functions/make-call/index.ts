@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -84,6 +86,28 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Pre-create the call record as outbound
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Find lead by phone number
+    const { data: lead } = await supabaseClient
+      .from("leads")
+      .select("id")
+      .eq("phone", to)
+      .maybeSingle();
+
+    await supabaseClient.from("calls").insert({
+      twilio_sid: result.sid,
+      from_number: fromNumber,
+      to_number: to,
+      status: "ringing",
+      direction: "outbound",
+      lead_id: lead?.id || null,
+    });
 
     return new Response(
       JSON.stringify({ success: true, callSid: result.sid }),
