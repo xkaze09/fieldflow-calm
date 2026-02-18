@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Briefcase, DollarSign, Clock, User, Plus, History } from "lucide-react";
 import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { useJobs, useCreateJob } from "@/hooks/useJobs";
+import { useUpdateJob } from "@/hooks/useUpdateJob";
 import { useLeads } from "@/hooks/useLeads";
 import { useTechnicians } from "@/hooks/useTechnicians";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +23,7 @@ export default function Jobs() {
   const { data: leads } = useLeads();
   const { data: technicians } = useTechnicians();
   const createJob = useCreateJob();
+  const updateJob = useUpdateJob();
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -161,7 +163,24 @@ export default function Jobs() {
                               ) : (
                                 <h3 className="font-semibold text-lg">No Customer</h3>
                               )}
-                              <StatusBadge status={job.status as any} />
+                              <Select
+                                value={job.status}
+                                onValueChange={(v) => {
+                                  updateJob.mutateAsync({ id: job.id, status: v })
+                                    .then(() => toast.success("Job status updated"))
+                                    .catch((e: any) => toast.error(e.message));
+                                }}
+                              >
+                                <SelectTrigger className="h-7 w-[130px] text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-popover z-50">
+                                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                                  <SelectItem value="in_progress">In Progress</SelectItem>
+                                  <SelectItem value="completed">Completed</SelectItem>
+                                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
                             <p className="text-sm text-muted-foreground">{job.location || "No location"}</p>
                           </div>
