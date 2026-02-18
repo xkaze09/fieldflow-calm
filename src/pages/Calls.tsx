@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Phone, Search, Play, Briefcase } from "lucide-react";
+import { Phone, Search, Play, Briefcase, History } from "lucide-react";
 import { useCalls } from "@/hooks/useCalls";
+import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -14,6 +15,7 @@ export default function Calls() {
   const { data: calls, isLoading } = useCalls();
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const [historyLead, setHistoryLead] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = calls?.filter((c) => {
     const q = search.toLowerCase();
@@ -74,7 +76,16 @@ export default function Calls() {
                         <Phone className="h-5 w-5 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium truncate">{(call as any).leads?.name || call.from_number}</p>
+                        {(call as any).leads?.name && call.lead_id ? (
+                          <button
+                            className="font-medium truncate hover:text-primary hover:underline transition-colors text-left"
+                            onClick={() => setHistoryLead({ id: call.lead_id!, name: (call as any).leads.name })}
+                          >
+                            {(call as any).leads.name}
+                          </button>
+                        ) : (
+                          <p className="font-medium truncate">{call.from_number}</p>
+                        )}
                         <p className="text-sm text-muted-foreground">{call.from_number} → {call.to_number}</p>
                       </div>
                     </div>
@@ -119,6 +130,13 @@ export default function Calls() {
           </CardContent>
         </Card>
       </div>
+
+      <CustomerHistoryDialog
+        leadId={historyLead?.id ?? null}
+        leadName={historyLead?.name ?? ""}
+        open={!!historyLead}
+        onOpenChange={(o) => { if (!o) setHistoryLead(null); }}
+      />
     </Layout>
   );
 }

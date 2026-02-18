@@ -2,7 +2,8 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Briefcase, DollarSign, Clock, User, Plus } from "lucide-react";
+import { Briefcase, DollarSign, Clock, User, Plus, History } from "lucide-react";
+import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { useJobs, useCreateJob } from "@/hooks/useJobs";
 import { useLeads } from "@/hooks/useLeads";
 import { useTechnicians } from "@/hooks/useTechnicians";
@@ -27,6 +28,7 @@ export default function Jobs() {
     lead_id: "", technician_id: "", location: "", scheduled_at: "",
     labor_hours: "", total_price: "",
   });
+  const [historyLead, setHistoryLead] = useState<{ id: string; name: string; phone?: string; location?: string } | null>(null);
 
   // Auto-open dialog when navigated with lead_id param
   useEffect(() => {
@@ -144,7 +146,21 @@ export default function Jobs() {
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-semibold text-lg">{(job as any).leads?.name || "No Customer"}</h3>
+                              {(job as any).leads?.name ? (
+                                <button
+                                  className="font-semibold text-lg hover:text-primary hover:underline transition-colors text-left"
+                                  onClick={() => setHistoryLead({
+                                    id: job.lead_id!,
+                                    name: (job as any).leads.name,
+                                    phone: (job as any).leads.phone,
+                                    location: (job as any).leads.location || job.location || undefined,
+                                  })}
+                                >
+                                  {(job as any).leads.name}
+                                </button>
+                              ) : (
+                                <h3 className="font-semibold text-lg">No Customer</h3>
+                              )}
                               <StatusBadge status={job.status as any} />
                             </div>
                             <p className="text-sm text-muted-foreground">{job.location || "No location"}</p>
@@ -210,6 +226,15 @@ export default function Jobs() {
           </CardContent>
         </Card>
       </div>
+
+      <CustomerHistoryDialog
+        leadId={historyLead?.id ?? null}
+        leadName={historyLead?.name ?? ""}
+        leadPhone={historyLead?.phone}
+        leadLocation={historyLead?.location}
+        open={!!historyLead}
+        onOpenChange={(o) => { if (!o) setHistoryLead(null); }}
+      />
     </Layout>
   );
 }

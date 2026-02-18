@@ -323,6 +323,72 @@ export type Database = {
         }
         Relationships: []
       }
+      service_history: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount: number | null
+          discount_reason: string | null
+          id: string
+          job_id: string | null
+          labor_summary: string | null
+          lead_id: string
+          membership: boolean | null
+          membership_note: string | null
+          notes: string | null
+          parts_summary: string | null
+          service_date: string
+          total_price: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount?: number | null
+          discount_reason?: string | null
+          id?: string
+          job_id?: string | null
+          labor_summary?: string | null
+          lead_id: string
+          membership?: boolean | null
+          membership_note?: string | null
+          notes?: string | null
+          parts_summary?: string | null
+          service_date?: string
+          total_price?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount?: number | null
+          discount_reason?: string | null
+          id?: string
+          job_id?: string | null
+          labor_summary?: string | null
+          lead_id?: string
+          membership?: boolean | null
+          membership_note?: string | null
+          notes?: string | null
+          parts_summary?: string | null
+          service_date?: string
+          total_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_history_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assigned_to: string | null
