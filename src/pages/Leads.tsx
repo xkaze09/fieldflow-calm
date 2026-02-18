@@ -40,10 +40,9 @@ export default function Leads() {
 
   const stats = [
     { label: "New", status: "new" as const },
-    { label: "Qualified", status: "qualified" as const },
-    { label: "Scheduled", status: "scheduled" as const },
-    { label: "Won", status: "won" as const },
-    { label: "Lost", status: "lost" as const },
+    { label: "Active", status: "active" as const },
+    { label: "Booked", status: "booked" as const },
+    { label: "Completed", status: "completed" as const },
   ];
 
   return (
@@ -85,7 +84,7 @@ export default function Leads() {
           </Dialog>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-4">
           {stats.map((stat) => (
             <Card key={stat.label}>
               <CardContent className="pt-6">

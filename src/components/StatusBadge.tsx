@@ -3,13 +3,15 @@ import { Badge } from "@/components/ui/badge";
 
 type Status =
   | "new"
+  | "active"
+  | "booked"
+  | "completed"
   | "qualified"
   | "scheduled"
   | "won"
   | "lost"
   | "pending"
   | "in-progress"
-  | "completed"
   | "cancelled"
   | "missed"
   | "answered";
@@ -19,6 +21,9 @@ const statusConfig: Record<
   { label: string; variant: "default" | "secondary" | "destructive" | "outline"; className?: string }
 > = {
   new: { label: "New", variant: "default", className: "bg-primary text-primary-foreground" },
+  active: { label: "Active", variant: "secondary", className: "bg-accent text-accent-foreground" },
+  booked: { label: "Booked", variant: "secondary", className: "bg-warning text-warning-foreground" },
+  completed: { label: "Completed", variant: "secondary", className: "bg-success text-success-foreground" },
   qualified: { label: "Qualified", variant: "secondary", className: "bg-accent text-accent-foreground" },
   scheduled: { label: "Scheduled", variant: "secondary", className: "bg-warning text-warning-foreground" },
   won: { label: "Won", variant: "secondary", className: "bg-success text-success-foreground" },
