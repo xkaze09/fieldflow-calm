@@ -2,7 +2,7 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Briefcase, DollarSign, Clock, User, Plus, History } from "lucide-react";
+import { Briefcase, DollarSign, Clock, User, Plus, History, FileText } from "lucide-react";
 import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { useJobs, useCreateJob } from "@/hooks/useJobs";
 import { useUpdateJob } from "@/hooks/useUpdateJob";
@@ -28,7 +28,7 @@ export default function Jobs() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     lead_id: "", technician_id: "", location: "", scheduled_at: "",
-    labor_hours: "", total_price: "",
+    labor_hours: "", total_price: "", notes: "",
   });
   const [historyLead, setHistoryLead] = useState<{ id: string; name: string; phone?: string; location?: string } | null>(null);
 
@@ -52,10 +52,11 @@ export default function Jobs() {
         scheduled_at: form.scheduled_at || null,
         labor_hours: form.labor_hours ? parseFloat(form.labor_hours) : 0,
         total_price: form.total_price ? parseFloat(form.total_price) : 0,
+        notes: form.notes || null,
       });
       toast.success("Job created");
       setOpen(false);
-      setForm({ lead_id: "", technician_id: "", location: "", scheduled_at: "", labor_hours: "", total_price: "" });
+      setForm({ lead_id: "", technician_id: "", location: "", scheduled_at: "", labor_hours: "", total_price: "", notes: "" });
     } catch (e: any) {
       toast.error(e.message);
     }
@@ -116,6 +117,10 @@ export default function Jobs() {
                     <Label>Total Price</Label>
                     <Input type="number" value={form.total_price} onChange={(e) => setForm({ ...form, total_price: e.target.value })} />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Notes</Label>
+                  <Input placeholder="Cables came off, wants 10% off..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
                 <Button onClick={handleCreate} disabled={createJob.isPending} className="w-full">
                   {createJob.isPending ? "Creating..." : "Create Job"}
@@ -183,6 +188,12 @@ export default function Jobs() {
                               </Select>
                             </div>
                             <p className="text-sm text-muted-foreground">{job.location || "No location"}</p>
+                            {(job as any).notes && (
+                              <p className="text-sm flex items-center gap-1 mt-1">
+                                <FileText className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                {(job as any).notes}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-border">
