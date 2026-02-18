@@ -7,23 +7,37 @@ import { useJobs, useCreateJob } from "@/hooks/useJobs";
 import { useLeads } from "@/hooks/useLeads";
 import { useTechnicians } from "@/hooks/useTechnicians";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { JobPartsSection } from "@/components/JobPartsSection";
 
 export default function Jobs() {
   const { data: jobs, isLoading } = useJobs();
   const { data: leads } = useLeads();
   const { data: technicians } = useTechnicians();
   const createJob = useCreateJob();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     lead_id: "", technician_id: "", location: "", scheduled_at: "",
     labor_hours: "", total_price: "",
   });
+
+  // Auto-open dialog when navigated with lead_id param
+  useEffect(() => {
+    const leadId = searchParams.get("lead_id");
+    const location = searchParams.get("location");
+    if (leadId) {
+      setForm((f) => ({ ...f, lead_id: leadId, location: location || "" }));
+      setOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleCreate = async () => {
     try {
@@ -159,6 +173,9 @@ export default function Jobs() {
                             <p className="text-xs text-muted-foreground mb-1">Parts</p>
                             <p className="font-medium text-sm">${Number(job.parts_cost || 0)}</p>
                           </div>
+                        </div>
+                        <div className="pt-4 border-t border-border">
+                          <JobPartsSection jobId={job.id} />
                         </div>
                         <div className="flex items-center justify-between pt-4 border-t border-border bg-secondary/30 -mx-4 -mb-4 px-4 py-3 rounded-b-lg">
                           <div className="flex gap-6 text-sm">

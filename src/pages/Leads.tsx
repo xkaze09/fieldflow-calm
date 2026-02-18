@@ -2,11 +2,12 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Users, Phone, Mail, MapPin, Plus } from "lucide-react";
+import { Users, Phone, Mail, MapPin, Plus, Briefcase } from "lucide-react";
 import { useLeads, useLeadCounts, useCreateLead } from "@/hooks/useLeads";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ export default function Leads() {
   const { data: leads, isLoading } = useLeads();
   const { data: counts } = useLeadCounts();
   const createLead = useCreateLead();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "", location: "" });
 
@@ -142,6 +144,13 @@ export default function Leads() {
                         <p className="text-muted-foreground">Status</p>
                         <StatusBadge status={lead.status as any} />
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/jobs?lead_id=${lead.id}&location=${encodeURIComponent(lead.location || "")}`)}
+                      >
+                        <Briefcase className="h-4 w-4 mr-1" />Create Job
+                      </Button>
                     </div>
                   </div>
                 ))}
