@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Users, Phone, Mail, MapPin, Plus, Briefcase, History } from "lucide-react";
-import { useLeads, useLeadCounts, useCreateLead } from "@/hooks/useLeads";
+import { useLeads, useLeadCounts, useCreateLead, useUpdateLead } from "@/hooks/useLeads";
 import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
@@ -12,12 +12,14 @@ import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 export default function Leads() {
   const { data: leads, isLoading } = useLeads();
   const { data: counts } = useLeadCounts();
   const createLead = useCreateLead();
+  const updateLead = useUpdateLead();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "", location: "" });
@@ -148,7 +150,24 @@ export default function Leads() {
                       </div>
                       <div>
                         <p className="text-muted-foreground">Status</p>
-                        <StatusBadge status={lead.status as any} />
+                        <Select
+                          value={lead.status}
+                          onValueChange={(v) => {
+                            updateLead.mutateAsync({ id: lead.id, status: v })
+                              .then(() => toast.success("Status updated"))
+                              .catch((e: any) => toast.error(e.message));
+                          }}
+                        >
+                          <SelectTrigger className="h-7 w-[120px] text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover z-50">
+                            <SelectItem value="new">New</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="booked">Booked</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <Button
                         variant="outline"
