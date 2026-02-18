@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Check, ChevronsUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useTechnicians, useCreateTechnician, useUpdateTechnician } from "@/hooks/useTechnicians";
+import { useJobs } from "@/hooks/useJobs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -29,8 +30,23 @@ export default function Technicians() {
   const updateTech = useUpdateTechnician();
   const [open, setOpen] = useState(false);
   const [editingTech, setEditingTech] = useState<Tables<"technicians"> | null>(null);
+  const { data: jobs } = useJobs();
   const [form, setForm] = useState(emptyForm);
   const [areaOpen, setAreaOpen] = useState(false);
+
+  const jobCountsByTech = useMemo(() => {
+    const map: Record<string, { total: number; completed: number; active: number }> = {};
+    jobs?.forEach((job) => {
+      const tid = job.technician_id;
+      if (!tid) return;
+      if (!map[tid]) map[tid] = { total: 0, completed: 0, active: 0 };
+      map[tid].total++;
+      if (job.status === "completed") map[tid].completed++;
+      else map[tid].active++;
+    });
+    return map;
+  }, [jobs]);
+
   const openCreate = () => {
     setEditingTech(null);
     setForm(emptyForm);
@@ -145,8 +161,8 @@ export default function Technicians() {
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card><CardContent className="pt-6"><div className="space-y-2"><p className="text-sm text-muted-foreground">Active Techs</p><p className="text-3xl font-bold">{technicians?.length ?? 0}</p></div></CardContent></Card>
-          <Card><CardContent className="pt-6"><div className="space-y-2"><p className="text-sm text-muted-foreground">Avg Cost Rate</p><p className="text-3xl font-bold">${technicians?.length ? Math.round(technicians.reduce((s, t) => s + Number(t.hourly_cost), 0) / technicians.length) : 0}/hr</p></div></CardContent></Card>
-          <Card><CardContent className="pt-6"><div className="space-y-2"><p className="text-sm text-muted-foreground">Avg Bill Rate</p><p className="text-3xl font-bold text-primary">${technicians?.length ? Math.round(technicians.reduce((s, t) => s + Number(t.hourly_rate), 0) / technicians.length) : 0}/hr</p></div></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="space-y-2"><p className="text-sm text-muted-foreground">Total Jobs</p><p className="text-3xl font-bold">{jobs?.length ?? 0}</p></div></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="space-y-2"><p className="text-sm text-muted-foreground">Completed Jobs</p><p className="text-3xl font-bold text-primary">{jobs?.filter(j => j.status === "completed").length ?? 0}</p></div></CardContent></Card>
         </div>
 
         {isLoading ? (
@@ -171,16 +187,16 @@ export default function Technicians() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Cost Rate</span>
-                      <span className="font-semibold">${Number(tech.hourly_cost)}/hr</span>
+                      <span className="text-muted-foreground">Total Jobs</span>
+                      <span className="font-semibold">{jobCountsByTech[tech.id]?.total ?? 0}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Bill Rate</span>
-                      <span className="font-semibold text-primary">${Number(tech.hourly_rate)}/hr</span>
+                      <span className="text-muted-foreground">Active Jobs</span>
+                      <span className="font-semibold text-primary">{jobCountsByTech[tech.id]?.active ?? 0}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Commission</span>
-                      <span className="font-semibold text-accent">{Number(tech.commission_rate)}%</span>
+                      <span className="text-muted-foreground">Completed Jobs</span>
+                      <span className="font-semibold text-accent">{jobCountsByTech[tech.id]?.completed ?? 0}</span>
                     </div>
                   </div>
                   {tech.contact && (
