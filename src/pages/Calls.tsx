@@ -3,19 +3,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Phone, Search, Play, Briefcase, History } from "lucide-react";
+import { Phone, Search, Play, Briefcase, PhoneOutgoing } from "lucide-react";
 import { useCalls } from "@/hooks/useCalls";
 import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Calls() {
   const { data: calls, isLoading } = useCalls();
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const [historyLead, setHistoryLead] = useState<{ id: string; name: string } | null>(null);
+  const [callDialogOpen, setCallDialogOpen] = useState(false);
+  const [callTo, setCallTo] = useState("");
+  const [calling, setCalling] = useState(false);
+
+  const handleMakeCall = async () => {
+    if (!callTo.trim()) {
+      toast.error("Enter a phone number");
+      return;
+    }
+    setCalling(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("make-call", {
+        body: { to: callTo.trim() },
+      });
+      if (error) throw error;
+      toast.success("Call initiated! Your phone will ring first, then we'll connect you.");
+      setCallDialogOpen(false);
+      setCallTo("");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to initiate call");
+    } finally {
+      setCalling(false);
+    }
+  };
 
   const filtered = calls?.filter((c) => {
     const q = search.toLowerCase();
@@ -36,9 +64,35 @@ export default function Calls() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Call Log</h1>
-          <p className="text-muted-foreground mt-1">View and manage all inbound calls</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Call Log</h1>
+            <p className="text-muted-foreground mt-1">View and manage all inbound calls</p>
+          </div>
+          <Dialog open={callDialogOpen} onOpenChange={setCallDialogOpen}>
+            <DialogTrigger asChild>
+              <Button><PhoneOutgoing className="h-4 w-4 mr-2" />Make Call</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Make Outbound Call</DialogTitle></DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                Your business phone will ring first. When you answer, we'll connect you to the customer.
+              </p>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Customer Phone Number</Label>
+                  <Input
+                    placeholder="+1 (555) 123-4567"
+                    value={callTo}
+                    onChange={(e) => setCallTo(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleMakeCall} disabled={calling} className="w-full">
+                  {calling ? "Initiating..." : "Call Now"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Card>
