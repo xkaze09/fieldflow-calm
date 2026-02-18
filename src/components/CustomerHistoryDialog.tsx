@@ -7,9 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useServiceHistory, useCreateServiceHistory } from "@/hooks/useServiceHistory";
-import { History, Plus, DollarSign, Star, Tag } from "lucide-react";
+import { History, Plus, DollarSign, Star, Tag, Sparkles, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from "react-markdown";
 
 interface Props {
   leadId: string | null;
@@ -24,6 +26,8 @@ export function CustomerHistoryDialog({ leadId, leadName, leadPhone, leadLocatio
   const { data: history, isLoading } = useServiceHistory(leadId);
   const createEntry = useCreateServiceHistory();
   const [adding, setAdding] = useState(false);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const [form, setForm] = useState({
     service_date: "",
     description: "",
@@ -36,6 +40,23 @@ export function CustomerHistoryDialog({ leadId, leadName, leadPhone, leadLocatio
     membership_note: "",
     notes: "",
   });
+
+  const handleAiSummary = async () => {
+    if (!leadId) return;
+    setAiLoading(true);
+    setAiSummary(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-customer-summary", {
+        body: { lead_id: leadId },
+      });
+      if (error) throw error;
+      setAiSummary(data.summary);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to generate summary");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleCreate = async () => {
     if (!leadId) return;
@@ -76,6 +97,34 @@ export function CustomerHistoryDialog({ leadId, leadName, leadPhone, leadLocatio
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* AI Callback Briefing */}
+          <div className="border border-primary/20 rounded-lg p-4 bg-primary/5 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                AI Callback Briefing
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAiSummary}
+                disabled={aiLoading}
+              >
+                {aiLoading ? (
+                  <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Generating...</>
+                ) : (
+                  <><Sparkles className="h-4 w-4 mr-1" />Generate</>
+                )}
+              </Button>
+            </div>
+            {aiSummary && (
+              <div className="text-sm prose prose-sm max-w-none leading-relaxed"><ReactMarkdown>{aiSummary}</ReactMarkdown></div>
+            )}
+            {!aiSummary && !aiLoading && (
+              <p className="text-xs text-muted-foreground">Click Generate to get an AI-powered summary of this customer before calling back.</p>
+            )}
+          </div>
+
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-muted-foreground">
               {history?.length ?? 0} service record{(history?.length ?? 0) !== 1 ? "s" : ""}
