@@ -125,7 +125,11 @@ export default function Calls() {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-8">No calls recorded yet</p>
+              <div className="text-center py-12 space-y-3">
+                <Phone className="h-10 w-10 text-muted-foreground mx-auto" />
+                <p className="text-lg font-medium">No calls recorded yet</p>
+                <p className="text-sm text-muted-foreground">Incoming and outgoing calls will appear here once connected.</p>
+              </div>
             )}
           </CardContent>
         </Card>
