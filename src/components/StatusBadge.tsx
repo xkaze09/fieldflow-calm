@@ -30,7 +30,6 @@ const statusConfig: Record<
   lost: { label: "Lost", variant: "destructive" },
   pending: { label: "Pending", variant: "outline" },
   "in-progress": { label: "In Progress", variant: "default", className: "bg-warning text-warning-foreground" },
-  completed: { label: "Completed", variant: "secondary", className: "bg-success text-success-foreground" },
   cancelled: { label: "Cancelled", variant: "destructive" },
   missed: { label: "Missed", variant: "destructive" },
   answered: { label: "Answered", variant: "secondary", className: "bg-success text-success-foreground" },
