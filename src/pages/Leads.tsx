@@ -2,8 +2,9 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Users, Phone, Mail, MapPin, Plus, Briefcase } from "lucide-react";
+import { Users, Phone, Mail, MapPin, Plus, Briefcase, History } from "lucide-react";
 import { useLeads, useLeadCounts, useCreateLead } from "@/hooks/useLeads";
+import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
@@ -20,6 +21,7 @@ export default function Leads() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "", location: "" });
+  const [historyLead, setHistoryLead] = useState<{ id: string; name: string; phone?: string; location?: string } | null>(null);
 
   const handleCreate = async () => {
     if (!form.name || !form.phone) {
@@ -117,7 +119,12 @@ export default function Leads() {
                         {lead.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold truncate">{lead.name}</p>
+                        <button
+                          className="font-semibold truncate text-left hover:text-primary hover:underline transition-colors"
+                          onClick={() => setHistoryLead({ id: lead.id, name: lead.name, phone: lead.phone, location: lead.location || undefined })}
+                        >
+                          {lead.name}
+                        </button>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{lead.phone}</span>
                           {lead.email && (
@@ -161,6 +168,15 @@ export default function Leads() {
           </CardContent>
         </Card>
       </div>
+
+      <CustomerHistoryDialog
+        leadId={historyLead?.id ?? null}
+        leadName={historyLead?.name ?? ""}
+        leadPhone={historyLead?.phone}
+        leadLocation={historyLead?.location}
+        open={!!historyLead}
+        onOpenChange={(o) => { if (!o) setHistoryLead(null); }}
+      />
     </Layout>
   );
 }
