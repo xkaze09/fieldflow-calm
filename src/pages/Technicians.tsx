@@ -1,16 +1,25 @@
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Check, ChevronsUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useTechnicians, useCreateTechnician, useUpdateTechnician } from "@/hooks/useTechnicians";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
+
+const SERVICE_AREAS = [
+  "Chicago", "Aurora", "Rockford", "Joliet", "Naperville",
+  "Springfield", "Peoria", "Elgin", "Waukegan",
+  "Throughout Illinois",
+];
 
 const emptyForm = { name: "", team: "", hourly_cost: "", hourly_rate: "", commission_rate: "", contact: "" };
 
@@ -21,7 +30,7 @@ export default function Technicians() {
   const [open, setOpen] = useState(false);
   const [editingTech, setEditingTech] = useState<Tables<"technicians"> | null>(null);
   const [form, setForm] = useState(emptyForm);
-
+  const [areaOpen, setAreaOpen] = useState(false);
   const openCreate = () => {
     setEditingTech(null);
     setForm(emptyForm);
@@ -85,7 +94,39 @@ export default function Technicians() {
               <DialogHeader><DialogTitle>{editingTech ? "Edit Technician" : "Add Technician"}</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2"><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Service Area</Label><Input placeholder="e.g. North Dallas, Downtown" value={form.team} onChange={(e) => setForm({ ...form, team: e.target.value })} /></div>
+                <div className="space-y-2">
+                  <Label>Service Area</Label>
+                  <Popover open={areaOpen} onOpenChange={setAreaOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" aria-expanded={areaOpen} className="w-full justify-between font-normal">
+                        {form.team || "Select service area..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover z-50" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search or type area..." onValueChange={(v) => setForm({ ...form, team: v })} />
+                        <CommandList>
+                          <CommandEmpty>
+                            {form.team ? (
+                              <button className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded" onClick={() => setAreaOpen(false)}>
+                                Use "{form.team}"
+                              </button>
+                            ) : "Type to add a custom area"}
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {SERVICE_AREAS.map((area) => (
+                              <CommandItem key={area} value={area} onSelect={(v) => { setForm({ ...form, team: v }); setAreaOpen(false); }}>
+                                <Check className={cn("mr-2 h-4 w-4", form.team === area ? "opacity-100" : "opacity-0")} />
+                                {area}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2"><Label>Cost Rate ($/hr)</Label><Input type="number" value={form.hourly_cost} onChange={(e) => setForm({ ...form, hourly_cost: e.target.value })} /></div>
                   <div className="space-y-2"><Label>Bill Rate ($/hr)</Label><Input type="number" value={form.hourly_rate} onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })} /></div>
