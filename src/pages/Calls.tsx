@@ -3,15 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Phone, Search, Play } from "lucide-react";
+import { Phone, Search, Play, Briefcase } from "lucide-react";
 import { useCalls } from "@/hooks/useCalls";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 export default function Calls() {
   const { data: calls, isLoading } = useCalls();
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
   const filtered = calls?.filter((c) => {
     const q = search.toLowerCase();
@@ -96,6 +98,15 @@ export default function Calls() {
                           <a href={call.recording_url} target="_blank" rel="noopener noreferrer">
                             <Play className="h-4 w-4 mr-1" />Play
                           </a>
+                        </Button>
+                      )}
+                      {call.lead_id && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/jobs?lead_id=${call.lead_id}`)}
+                        >
+                          <Briefcase className="h-4 w-4 mr-1" />Create Job
                         </Button>
                       )}
                     </div>
