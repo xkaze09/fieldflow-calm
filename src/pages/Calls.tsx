@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Phone, Search, Play, Briefcase, PhoneOutgoing, PhoneIncoming, PhoneMissed, PhoneCall } from "lucide-react";
+import { Phone, Search, Play, Briefcase, PhoneOutgoing, PhoneIncoming, PhoneMissed, PhoneCall, Building2 } from "lucide-react";
 import { useCalls } from "@/hooks/useCalls";
+import { useBusinessLookup, matchBusiness } from "@/hooks/useBusinessLines";
 import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 
 export default function Calls() {
   const { data: calls, isLoading } = useCalls();
+  const businessLookup = useBusinessLookup();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -188,6 +190,15 @@ export default function Calls() {
                           <p className="font-medium truncate">{call.from_number}</p>
                         )}
                         <p className="text-sm text-muted-foreground">{call.from_number} → {call.to_number}</p>
+                        {(() => {
+                          const biz = matchBusiness(businessLookup, call.to_number);
+                          return biz ? (
+                            <p className="text-xs text-primary flex items-center gap-1 mt-0.5">
+                              <Building2 className="h-3 w-3" />
+                              {biz.name}
+                            </p>
+                          ) : null;
+                        })()}
                       </div>
                     </div>
                     <div className="flex items-center gap-6 text-sm flex-wrap">
