@@ -2,8 +2,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { PhoneCall, X } from "lucide-react";
+import { PhoneCall, PhoneOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function IncomingCallBanner() {
   const navigate = useNavigate();
@@ -58,6 +59,44 @@ export function IncomingCallBanner() {
             </span>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={async () => {
+                const { error } = await supabase
+                  .from("calls")
+                  .update({ status: "answered" })
+                  .eq("id", call.id);
+                if (error) {
+                  toast.error("Failed to answer call");
+                } else {
+                  toast.success("Call answered");
+                  queryClient.invalidateQueries({ queryKey: ["ringing-calls"] });
+                  queryClient.invalidateQueries({ queryKey: ["calls"] });
+                }
+              }}
+            >
+              <PhoneCall className="h-4 w-4 mr-1" />Answer
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="bg-destructive/90 hover:bg-destructive text-destructive-foreground"
+              onClick={async () => {
+                const { error } = await supabase
+                  .from("calls")
+                  .update({ status: "missed" })
+                  .eq("id", call.id);
+                if (error) {
+                  toast.error("Failed to decline call");
+                } else {
+                  queryClient.invalidateQueries({ queryKey: ["ringing-calls"] });
+                  queryClient.invalidateQueries({ queryKey: ["calls"] });
+                }
+              }}
+            >
+              <PhoneOff className="h-4 w-4 mr-1" />Decline
+            </Button>
             <Button
               size="sm"
               variant="secondary"
