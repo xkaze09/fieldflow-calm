@@ -14,7 +14,9 @@ type Status =
   | "in-progress"
   | "cancelled"
   | "missed"
-  | "answered";
+  | "answered"
+  | "ringing"
+  | "voicemail";
 
 const statusConfig: Record<
   Status,
@@ -33,11 +35,13 @@ const statusConfig: Record<
   cancelled: { label: "Cancelled", variant: "destructive" },
   missed: { label: "Missed", variant: "destructive" },
   answered: { label: "Answered", variant: "secondary", className: "bg-success text-success-foreground" },
+  ringing: { label: "Ringing", variant: "default", className: "bg-primary text-primary-foreground animate-pulse" },
+  voicemail: { label: "Voicemail", variant: "outline" },
 };
 
 export function StatusBadge({ status }: { status: Status }) {
-  const config = statusConfig[status];
-  
+  const config = statusConfig[status] ?? { label: status, variant: "outline" as const };
+
   return (
     <Badge variant={config.variant} className={cn("font-medium", config.className)}>
       {config.label}
