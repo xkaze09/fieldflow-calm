@@ -2,13 +2,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { PhoneCall, PhoneOff } from "lucide-react";
+import { PhoneCall, PhoneOff, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useBusinessLookup, matchBusiness } from "@/hooks/useBusinessLines";
 
 export function IncomingCallBanner() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const businessLookup = useBusinessLookup();
 
   // Listen for realtime changes on calls table
   useEffect(() => {
@@ -53,10 +55,21 @@ export function IncomingCallBanner() {
         >
           <div className="flex items-center gap-3 min-w-0">
             <PhoneCall className="h-5 w-5 flex-shrink-0 animate-bounce" />
-            <span className="font-medium truncate">
-              Incoming call from{" "}
-              {(call as any).leads?.name || call.from_number}
-            </span>
+            <div className="min-w-0">
+              <span className="font-medium truncate block">
+                Incoming call from{" "}
+                {(call as any).leads?.name || call.from_number}
+              </span>
+              {(() => {
+                const biz = matchBusiness(businessLookup, call.to_number);
+                return biz ? (
+                  <span className="text-xs opacity-80 flex items-center gap-1">
+                    <Building2 className="h-3 w-3" />
+                    via {biz.name}
+                  </span>
+                ) : null;
+              })()}
+            </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Button
