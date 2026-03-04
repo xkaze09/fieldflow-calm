@@ -28,7 +28,7 @@ const navigation = [
   { name: "Schedule", href: "/schedule", icon: CalendarDays },
   { name: "Parts", href: "/parts", icon: Package },
   { name: "Technicians", href: "/technicians", icon: Wrench },
-  { name: "History", href: "/history", icon: History },
+  { name: "Customer History", href: "/history", icon: History },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
