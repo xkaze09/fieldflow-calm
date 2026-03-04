@@ -12,6 +12,7 @@ import Schedule from "./pages/Schedule";
 import Parts from "./pages/Parts";
 import Technicians from "./pages/Technicians";
 import Settings from "./pages/Settings";
+import History from "./pages/History";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/parts" element={<ProtectedRoute><Parts /></ProtectedRoute>} />
             <Route path="/technicians" element={<ProtectedRoute><Technicians /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
