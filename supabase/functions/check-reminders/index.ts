@@ -30,6 +30,27 @@ Deno.serve(async (req) => {
 
     if (overdueTasks && overdueTasks.length > 0) {
       results.push(`Found ${overdueTasks.length} overdue task(s)`);
+
+      const ownerPhone = Deno.env.get("TWILIO_PHONE_NUMBER");
+      if (ownerPhone) {
+        const summaryLines = overdueTasks.map((t: any) => {
+          const leadName = t.leads?.name || "Unknown";
+          return `• ${leadName}: ${t.notes || "No notes"}`;
+        });
+
+        const smsUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-sms`;
+        await fetch(smsUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({
+            to: ownerPhone,
+            message: `⏰ ${overdueTasks.length} overdue task(s):\n${summaryLines.join("\n")}`,
+          }),
+        });
+      }
     }
 
     // 2. Find jobs starting in the next hour
@@ -44,6 +65,24 @@ Deno.serve(async (req) => {
 
     if (upcomingJobs && upcomingJobs.length > 0) {
       results.push(`Found ${upcomingJobs.length} upcoming job(s) within 1 hour`);
+
+      for (const job of upcomingJobs as any[]) {
+        const techContact = job.technicians?.contact;
+        if (techContact) {
+          const smsUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-sms`;
+          await fetch(smsUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+            },
+            body: JSON.stringify({
+              to: techContact,
+              message: `🔔 Reminder: Job for ${job.leads?.name || "customer"} at ${job.location || "TBD"} starts at ${new Date(job.scheduled_at).toLocaleTimeString()}.`,
+            }),
+          });
+        }
+      }
     }
 
     if (results.length === 0) {

@@ -30,7 +30,6 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Fetch lead info
     const { data: lead } = await supabase
       .from("leads")
       .select("*")
@@ -44,8 +43,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch related data in parallel
-    const [jobsRes, historyRes] = await Promise.all([
+    const [callsRes, jobsRes, historyRes] = await Promise.all([
+      supabase
+        .from("calls")
+        .select("status, direction, duration_seconds, started_at, from_number, to_number")
+        .eq("lead_id", lead_id)
+        .order("started_at", { ascending: false })
+        .limit(10),
       supabase
         .from("jobs")
         .select("status, scheduled_at, total_price, location, labor_hours")
@@ -69,15 +73,17 @@ Deno.serve(async (req) => {
         status: lead.status,
         since: lead.created_at,
       },
+      recentCalls: callsRes.data || [],
       jobs: jobsRes.data || [],
       serviceHistory: historyRes.data || [],
     };
 
-    const systemPrompt = `You are a dispatcher assistant for a field service company. Generate a brief customer briefing. Be concise, actionable, and highlight:
+    const systemPrompt = `You are a dispatcher assistant for a field service company. Generate a brief customer briefing for an agent about to call back a customer. Be concise, actionable, and highlight:
 1. Who they are and their status
-2. Job history and any pending work
-3. Service history highlights (membership, discounts, total spend)
-4. Recommended talking points
+2. Recent call activity (missed calls, frequency)
+3. Job history and any pending work
+4. Service history highlights (membership, discounts, total spend)
+5. Recommended talking points for the callback
 
 Keep it under 200 words. Use bullet points. Be direct and practical.`;
 
@@ -95,7 +101,7 @@ Keep it under 200 words. Use bullet points. Be direct and practical.`;
             { role: "system", content: systemPrompt },
             {
               role: "user",
-              content: `Generate a customer briefing:\n\n${JSON.stringify(context, null, 2)}`,
+              content: `Generate a callback briefing for this customer:\n\n${JSON.stringify(context, null, 2)}`,
             },
           ],
         }),
