@@ -6,6 +6,7 @@ import { useHistory } from "@/hooks/useHistory";
 import { Search, History as HistoryIcon, Building2, User, MapPin, Phone, Calendar, Clock } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import { AddHistoryDialog } from "@/components/AddHistoryDialog";
 
 export default function History() {
   const { data: history, isLoading } = useHistory();
@@ -24,9 +25,12 @@ export default function History() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Client History</h1>
-          <p className="text-muted-foreground mt-1">Complete call and appointment history</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Customer History</h1>
+            <p className="text-muted-foreground mt-1">Complete call and appointment history</p>
+          </div>
+          <AddHistoryDialog />
         </div>
 
         <Card>
