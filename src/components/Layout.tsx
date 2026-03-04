@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   LogOut,
-  Settings
+  Settings,
+  History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -27,6 +28,7 @@ const navigation = [
   { name: "Schedule", href: "/schedule", icon: CalendarDays },
   { name: "Parts", href: "/parts", icon: Package },
   { name: "Technicians", href: "/technicians", icon: Wrench },
+  { name: "History", href: "/history", icon: History },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
