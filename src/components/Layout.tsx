@@ -17,11 +17,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { IncomingCallBanner } from "@/components/IncomingCallBanner";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Calls", href: "/calls", icon: Phone },
   { name: "Leads", href: "/leads", icon: Users },
   { name: "Jobs", href: "/jobs", icon: Briefcase },
   { name: "Schedule", href: "/schedule", icon: CalendarDays },
@@ -37,7 +35,6 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <IncomingCallBanner />
       {/* Mobile menu button */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
