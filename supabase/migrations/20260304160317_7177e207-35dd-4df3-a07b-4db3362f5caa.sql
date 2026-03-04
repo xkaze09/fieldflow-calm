@@ -1,0 +1,5 @@
+
+CREATE EXTENSION IF NOT EXISTS citext SCHEMA public;
+
+ALTER TABLE leads ALTER COLUMN name TYPE citext;
+ALTER TABLE leads ALTER COLUMN location TYPE citext;
