@@ -51,6 +51,7 @@ export function useHistory() {
 
         return {
           id: call.id,
+          leadId: call.lead_id,
           companyName,
           clientName: lead?.name || null,
           address: lead?.location || null,
