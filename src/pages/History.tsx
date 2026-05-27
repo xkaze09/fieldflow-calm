@@ -7,10 +7,14 @@ import { Search, History as HistoryIcon, Building2, User, MapPin, Phone, Calenda
 import { useState } from "react";
 import { format } from "date-fns";
 import { AddHistoryDialog } from "@/components/AddHistoryDialog";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
+import { CustomerHistoryDialog } from "@/components/CustomerHistoryDialog";
 
 export default function History() {
   const { data: history, isLoading } = useHistory();
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<{ leadId: string; name: string; phone?: string; location?: string } | null>(null);
 
   const filtered = history?.filter((h) => {
     const q = search.toLowerCase();
@@ -72,6 +76,7 @@ export default function History() {
                       <th className="pb-3 font-medium text-muted-foreground">Phone</th>
                       <th className="pb-3 font-medium text-muted-foreground">Appointment Date</th>
                       <th className="pb-3 font-medium text-muted-foreground">Appointment Time</th>
+                      <th className="pb-3 font-medium text-muted-foreground">AI</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -121,6 +126,27 @@ export default function History() {
                             <span className="text-muted-foreground italic">—</span>
                           )}
                         </td>
+                        <td className="py-3">
+                          {row.leadId ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setSelected({
+                                  leadId: row.leadId!,
+                                  name: row.clientName || "Unknown",
+                                  phone: row.phone,
+                                  location: row.address || undefined,
+                                })
+                              }
+                            >
+                              <Sparkles className="h-3.5 w-3.5 mr-1" />
+                              Briefing
+                            </Button>
+                          ) : (
+                            <span className="text-muted-foreground italic">—</span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -136,6 +162,14 @@ export default function History() {
           </CardContent>
         </Card>
       </div>
+      <CustomerHistoryDialog
+        leadId={selected?.leadId ?? null}
+        leadName={selected?.name ?? ""}
+        leadPhone={selected?.phone}
+        leadLocation={selected?.location}
+        open={!!selected}
+        onOpenChange={(o) => !o && setSelected(null)}
+      />
     </Layout>
   );
 }
