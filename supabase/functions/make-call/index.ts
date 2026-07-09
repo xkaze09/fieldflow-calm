@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
     // Log the outbound call
     await supabase.from("calls").insert({
-      twilio_call_sid: result.sid,
+      twilio_sid: result.sid,
       from_number: fromNumber,
       to_number: to,
       direction: "outbound",
